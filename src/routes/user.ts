@@ -2,7 +2,6 @@ import { Router } from 'express'
 import { prisma } from '../lib/prisma'
 import z, { ZodError } from 'zod'
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
 
 const userRouter = Router()
 
@@ -24,6 +23,41 @@ userRouter.get('/', async(request, response) => {
 
     } catch (error) {
         return response.status(500).json({ message: 'Internal Server Error', error })
+    }
+})
+
+userRouter.get('/:id', async(request, response) => {
+    const paramsSchema = z.object({
+        id: z.string({
+            required_error: 'O parâmetro id é obrigatório e do tipo uuid.'
+        }).uuid()
+    })
+
+    try {
+        const { id } = paramsSchema.parse(request.params)
+
+        const user = await prisma.user.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                createdAt: true    
+            }
+        })
+
+        if (!user) {
+            return response.status(404).json({ message: 'Não existe usuário cadastrado com esse id.' })
+        }
+
+        return response.status(200).json( user )
+
+    } catch (error) {
+        if (error instanceof ZodError) {
+            return response.status(400).json({ message: 'Erro de validação.', error })
+        }
+
+        return response.status(500).json({ message: 'Internal Server Error.' })
     }
 })
 
@@ -56,7 +90,7 @@ userRouter.put('/:id', async(request, response) => {
         })
 
         if (!user) {
-            return response.status(400).json({ message: 'Não existe usuário cadastrado com esse id.' })
+            return response.status(404).json({ message: 'Não existe usuário cadastrado com esse id.' })
         }
 
         if (password) {
@@ -106,7 +140,7 @@ userRouter.delete('/:id', async(request, response) => {
         })
 
         if (!user) {
-            return response.status(400).json({ message: 'Não existe usuário cadastrado com esse id.' })
+            return response.status(404).json({ message: 'Não existe usuário cadastrado com esse id.' })
         }
 
         await prisma.user.delete({

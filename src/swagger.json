@@ -1,0 +1,429 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Restful Autenticação JWT",
+        "description": "Essa API tem como objetivo implementar a estratégia de autenticação JWT.",
+        "contact": {
+            "email": "peusodati@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3333/v1",
+            "description": "API de Desenvolvimento"
+        }
+    ],
+    "paths": {
+        "/auth/register": {
+            "post": {
+                "sumary": "Rota para cadastro de usuário.",
+                "description": "Está rota é responsável por cadastrar um usuário.",
+                "tags": ["Auth"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schema/User"
+                            },
+                            "examples": {
+                                "User": {
+                                    "value": {
+                                        "name": "Juca Tadeu",
+                                        "email": "jucatadeu@gmail.com",
+                                        "password": "Agridoce.25",
+                                        "confirmPassword": "Agridoce.25"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schema/User"
+                                },
+                                "examples": {
+                                    "Sucesso": {
+                                        "sumary": "Sucesso.",
+                                        "value": {
+                                            "message": "Usuário criado com sucesso."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação ou outro erro do cliente.",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Envio incorreto de dados": {
+                                        "sumary": "Envio incorreto de dados.",
+                                        "value": {
+                                            "message": "Os campos password e confirmPassword devem ser iguais."
+                                        }
+                                    },
+                                    "Usuário já cadastrado": {
+                                        "sumary": "Usuário já cadastrado.",
+                                        "value": {
+                                            "message": "Já existe um usuário cadastrado com este e-mail."
+                                        }
+                                    },
+                                    "Erro de validação": {
+                                        "sumary": "Erro de validação dos dados enviados.",
+                                        "value": { 
+                                            "code": "nvalid_type",
+                                            "expected": "string",
+                                            "received": "undefined",
+                                            "path": [
+                                                "email"
+                                            ]
+                                            ,
+                                            "message": "O campo e-mail é obrigatório."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "sumary": "Rota para login.",
+                "description": "Está rota é responsável por realizar o login usando a estratégia JWT.",
+                "tags": ["Auth"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "examples": {
+                                "Login": {
+                                    "value": {
+                                        "email": "jucatadeu@gmail.com",
+                                        "password": "Agridoce.25"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Autenticação realizada.",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Sucesso": {
+                                        "sumary": "Sucesso na autenticação.",
+                                        "value": {
+                                            "message": "Autenticação realizada com sucesso.",
+                                            "token": "Token"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação ou outro erro do cliente.",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Envio incorreto de dados": {
+                                        "sumary": "Usuário não encontrado.",
+                                        "value": {
+                                            "message": "Não existe usuário cadastrado com este e-mail."
+                                        }
+                                    },
+                                    "Erro de validação": {
+                                        "sumary": "Erro de validação dos dados enviados.",
+                                        "value": { 
+                                            "code": "nvalid_type",
+                                            "expected": "string",
+                                            "received": "undefined",
+                                            "path": [
+                                                "email"
+                                            ]
+                                            ,
+                                            "message": "O campo e-mail é obrigatório."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Dados inconsistentes.",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Envio incorreto de dados": {
+                                        "sumary": "Senha incorreta",
+                                        "value": {
+                                            "message": "Senha invalida."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Internal Server Error": {
+                                        "value": {
+                                            "message": "Internal Server Error."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "security": [{
+                    "bearerAuth": []
+                }],
+                "sumary": "Rota para busca de usuários.",
+                "description": "Esta rota é responsável por buscar todos os usuários cadastrados.",
+                "tags": ["Users"],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schema/UserArray"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "security": [{
+                    "bearerAuth": []
+                }],
+                "sumary": "Rota para buscar um usuário.",
+                "description": "Esta rota é responsável por buscar um usuário cadastrado por id específico.",
+                "tags": ["Users"],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id para busca de usuário.",
+                        "type": "string",
+                        "format": "uuid",
+                        "required": true,
+                        "example": "8a1dfb34-c487-404d-ae7b-8464da1679f0"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schema/UserById"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/UserNoExist"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+
+
+                }
+            },
+            "put": {
+                "security": [{
+                    "bearerAuth": []
+                }],
+                "sumary": "Rota para atualizar um usuário.",
+                "description": "Esta rota é responsável por atualizar um usuário cadastrado por id específico.",
+                "tags": ["Users"]
+            },
+            "delete": {
+                "security": [{
+                    "bearerAuth": []
+                }],
+                "sumary": "Rota para deletar um usuário.",
+                "description": "Esta rota é responsável por deletar um usuário cadastrado por id específico.",
+                "tags": ["Users"]
+            }
+        }
+    },
+    "components": {
+        "schema": {
+            "User": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UserById": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "createdAt": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UserArray": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "email": {
+                            "type": "string",
+                            "format": "email"
+                        },
+                        "createdAt": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "responses": {
+            "Unauthorized": {
+                "description": "Unauthorized",
+                "content": {
+                    "application/json": {
+                        "examples": {
+                            "Unauthorized": {
+                                "value": {
+                                    "message": "Acesso não autorizado."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "UserNoExist": {
+                "description": "Usuário não encontrado",
+                "content": {
+                    "application/json": {
+                        "examples": {
+                            "Usuário não encontrado": {
+                                "value": {
+                                    "message": "Não existe usuário cadastrado com esse id."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ValidationError": {
+                "description": "Erro de validação",
+                "content": {
+                    "application/json": {
+                        "examples": {
+                            "Erro de validação": {
+                                "sumary": "Erro na validação dos dados enviados",
+                                "value": {
+                                    "validation": "uuid",
+                                    "code": "invalid_string",
+                                    "message": "Invalid uuid || O campo id deve ser do tipo string uuid",
+                                    "path": [
+                                        "id"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "InternalServerError": {
+                "description": "Internal Server Error",
+                "content": {
+                    "application/json": {
+                        "examples": {
+                            "Internal Server Error": {
+                                "sumary": "Internal Server Error",
+                                "value": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
