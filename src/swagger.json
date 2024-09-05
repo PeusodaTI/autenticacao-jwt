@@ -12,6 +12,10 @@
         {
             "url": "http://localhost:3333/v1",
             "description": "API de Desenvolvimento"
+        },
+        {
+            "url": "https://api-autenticacao-jwt.onrender.com/v1",
+            "description": "API de Produção"
         }
     ],
     "paths": {
@@ -139,12 +143,6 @@
                         "content": {
                             "application/json": {
                                 "examples": {
-                                    "Envio incorreto de dados": {
-                                        "sumary": "Usuário não encontrado.",
-                                        "value": {
-                                            "message": "Não existe usuário cadastrado com este e-mail."
-                                        }
-                                    },
                                     "Erro de validação": {
                                         "sumary": "Erro de validação dos dados enviados.",
                                         "value": { 
@@ -177,19 +175,11 @@
                             }
                         }
                     },
+                    "404": {
+                        "$ref": "#/components/responses/UserNoExist"
+                    },
                     "500": {
-                        "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "examples": {
-                                    "Internal Server Error": {
-                                        "value": {
-                                            "message": "Internal Server Error."
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/InternalServerError"
                     }
                 }
             }
@@ -233,13 +223,7 @@
                 "tags": ["Users"],
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Id para busca de usuário.",
-                        "type": "string",
-                        "format": "uuid",
-                        "required": true,
-                        "example": "8a1dfb34-c487-404d-ae7b-8464da1679f0"
+                        "$ref": "#/components/parameters/id"
                     }
                 ],
                 "responses": {
@@ -265,8 +249,6 @@
                     "500": {
                         "$ref": "#/components/responses/InternalServerError"
                     }
-
-
                 }
             },
             "put": {
@@ -275,7 +257,59 @@
                 }],
                 "sumary": "Rota para atualizar um usuário.",
                 "description": "Esta rota é responsável por atualizar um usuário cadastrado por id específico.",
-                "tags": ["Users"]
+                "tags": ["Users"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schema/UserUpdate"
+                            },
+                            "examples": {
+                                "User": {
+                                    "value": {
+                                        "name": "Juca Tadeu",
+                                        "email": "jucatadeu@gmail.com",
+                                        "password": "Agridoce.25",
+                                        "confirmPassword": "Agridoce.25"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Sucesso": {
+                                        "value": {
+                                            "message": "Usuário atualizado com sucesso."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/UserNoExist"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
             },
             "delete": {
                 "security": [{
@@ -283,7 +317,37 @@
                 }],
                 "sumary": "Rota para deletar um usuário.",
                 "description": "Esta rota é responsável por deletar um usuário cadastrado por id específico.",
-                "tags": ["Users"]
+                "tags": ["Users"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Sucesso": {
+                                        "value": {
+                                            "message": "Usuário excluído com sucesso."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
             }
         }
     },
@@ -297,16 +361,43 @@
                         "format": "uuid"
                     },
                     "name": {
-                        "type": "string"
+                        "type": "string",
+                        "required": true
                     },
                     "email": {
                         "type": "string",
-                        "format": "email"
+                        "format": "email",
+                        "required": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "createdAt": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UserUpdate": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "required": true
                     },
                     "password": {
                         "type": "string"
                     },
-                    "createdAt": {
+                    "confirmPassword": {
                         "type": "string"
                     }
                 }
@@ -423,6 +514,17 @@
                         }
                     }
                 }
+            }
+        },
+        "parameters": {
+            "id": {
+                "name": "id",
+                "in": "path",
+                "description": "Id do usuário.",
+                "type": "string",
+                "format": "uuid",
+                "required": true,
+                "example": "8a1dfb34-c487-404d-ae7b-8464da1679f0"
             }
         }
     }

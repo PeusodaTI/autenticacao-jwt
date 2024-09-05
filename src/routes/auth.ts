@@ -81,7 +81,7 @@ authRouter.post('/login', async(request, response) => {
         })
 
         if (!user) {
-            return response.status(400).json({ message: 'Não existe usuário cadastrado com esse e-mail.' })
+            return response.status(404).json({ message: 'Não existe usuário cadastrado com esse e-mail.' })
         }
 
         const checkedPassword = await bcrypt.compare(password, user.password)
@@ -112,7 +112,7 @@ authRouter.post('/login', async(request, response) => {
             return response.status(400).json({ message: 'Erro de validação.', error })
         }
 
-        return response.status(500).json({ message: 'Internal Server Error.' })
+        return response.status(500).json({ message: 'Internal Server Error.', error })
     }
 })
 
