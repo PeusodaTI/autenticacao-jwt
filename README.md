@@ -12,7 +12,7 @@ A aplicação consistem em uma ferramenta para gerência de usuários utilizando
 A aplicação foi documentada utilizando a ferramenta Swagger UI. Desse modo, qualquer usuário pode testar os endpoints da aplicação através da interface de usuário.
 
 ## Layout Swagger
-![Swagger](https://github.com/PeusodaTI/Biblioteca-Virtual/blob/main/assets/swagger.png)
+![Swagger](https://github.com/PeusodaTI/autenticacao-jwt/blob/main/assets/swagger.png)
 
 # Tecnologias utilizadas
 ## Back end
